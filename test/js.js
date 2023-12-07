@@ -1,7 +1,7 @@
 var selection = document.getElementById("selection");
 var map = L.map("map").setView([-20.91093577199996, 55.40255007600007], 13);
 
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
   maxZoom: 19,
   attribution:
     '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -100,7 +100,15 @@ function changeBusLineStyle(selectedOption) {
     }
   });
 }
+function removeAllLayers() {
+  geoJsonLayers.forEach((layer) => {
+    map.removeLayer(layer.layer);
+  });
 
+  busStopGeoJsonLayers.forEach((layer) => {
+    map.removeLayer(layer.layer);
+  });
+}
 // Function to change the style of a specific GeoJSON layer for bus stops
 function changeBusStopStyle(selectedOption) {
   busStopGeoJsonLayers.forEach((layer) => {
@@ -108,7 +116,7 @@ function changeBusStopStyle(selectedOption) {
     if (busLines.includes(selectedOption)) {
       // Change the style for the selected bus line in bus stops
       layer.layer.setStyle({
-        fillColor: "red", // Change this to the desired style
+        fillColor: "red",
         color: "black",
         weight: 2,
         opacity: 1,
@@ -116,12 +124,26 @@ function changeBusStopStyle(selectedOption) {
       });
     } else {
       // Reset the style to the default style for other bus stops
-      layer.layer.setStyle({ opacity: 0,
-      fillOpacity:0 });
+      layer.layer.setStyle({ opacity: 0, fillOpacity: 0 });
     }
   });
 }
 
+function showAllDataByLine() {
+  removeAllLayers();
+  geoJsonLayers.forEach((layer) => {
+    layer.layer.addTo(map); // Add all bus lines back to the map
+    layer.layer.setStyle(layer.defaultStyle); // Reset the style
+  });
+}
+function showAllDataByBusStop() {
+  removeAllLayers(); // Remove existing layers
+
+  busStopGeoJsonLayers.forEach((layer) => {
+    layer.layer.addTo(map); // Add all bus stops back to the map
+    layer.layer.setStyle(layer.defaultStyle); // Reset the style
+  });
+}
 // Attach the changeBusLineStyle and changeBusStopStyle functions to the change event of the select element
 selection.addEventListener("change", function () {
   let selectedOption = this.value;
